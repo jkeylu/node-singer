@@ -1,0 +1,24 @@
+{
+  "name": "singer",
+  "version": "0.0.0",
+  "description": "node-singer ===========",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jkeylu/node-singer.git"
+  },
+  "author": "jKey Lu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jkeylu/node-singer/issues"
+  },
+  "dependencies": {
+    "speaker": "0.0.10",
+    "lame": "~1.0.3",
+    "bindings": "*",
+    "request": "~2.33.0"
+  }
+}
