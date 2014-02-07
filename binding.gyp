@@ -6,7 +6,7 @@
           'src/binding.cc'
         ],
         'dependencies': [
-          'deps/libmpg123/mpg123.gyp:output'
+          'deps/libmpg123/mpg123.gyp:mpg123'
         ]
     }
   ]

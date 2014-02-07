@@ -19,6 +19,10 @@
     "speaker": "0.0.10",
     "lame": "~1.0.3",
     "bindings": "*",
-    "request": "~2.33.0"
+    "request": "*",
+    "debug": "*"
+  },
+  "devDependencies": {
+    "keypress": "~0.2.1"
   }
 }
