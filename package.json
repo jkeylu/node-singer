@@ -16,7 +16,7 @@
     "url": "https://github.com/jkeylu/node-singer/issues"
   },
   "dependencies": {
-    "speaker": "0.0.10",
+    "speaker": "https://github.com/jkeylu/node-speaker/archive/v0.0.10-p1.tar.gz",
     "lame": "~1.0.3",
     "bindings": "*",
     "request": "*",

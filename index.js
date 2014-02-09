@@ -10,12 +10,10 @@ var EventEmitter = require('events').EventEmitter
 module.exports = Singer;
 
 function Singer() {
-  this.decoder = new lame.Decoder();
-  this.speaker = new Speaker();
+  this.decoder = null;
   this.stream = null;
+  this.speaker = null;
   this.state = 'stoped';
-
-  this.decoder.pipe(this.speaker);
 }
 
 inherits(Singer, EventEmitter);
@@ -46,8 +44,13 @@ Singer.prototype._setStream = function (s, done) {
 };
 
 Singer.prototype.sing = function (s) {
+  debug('Sing song path: "%s"', s);
+
   var self = this;
-  debug(s);
+
+  if (this.state != 'stoped') {
+    this.stop();
+  }
   this._setStream(s, function(err) {
     if (err) {
       debug(err);
@@ -55,27 +58,37 @@ Singer.prototype.sing = function (s) {
     }
 
     self.state = 'singing';
-    self.stream.pipe(self.decoder);
+    self.decoder = new lame.Decoder();
+    self.stream.pipe(self.decoder).on('format', function (format) {
+      self.speaker = new Speaker(format);
+      self.decoder.pipe(self.speaker);
+    });
   });
 };
 
 Singer.prototype.pause = function () {
-  if (this.stream) {
-    if (this.state == 'singing') {
-      this.state = 'paused';
-      this.stream.pause();
-    } else if (this.state == 'paused') {
-      this.state = 'singing';
-      this.stream.resume();
-    }
+  if (this.stream && this.state == 'singing') {
+    this.state = 'paused';
+    this.stream.unpipe();
+  }
+};
+
+Singer.prototype.resume = function () {
+  if (this.stream && this.state == 'paused') {
+    this.state = 'singing';
+    this.stream.pipe(this.decoder);
   }
 };
 
 Singer.prototype.stop = function () {
   if (this.stream) {
-    this.stream.unpipe(this.decoder);
+    this.stream.unpipe();
     this.stream.destroy();
     this.stream = null;
+
+    this.decoder.unpipe();
+    this.speaker.end();
+    this.speaker = null;
   }
 };
 
@@ -87,5 +100,5 @@ Singer.prototype.turnTo = function (vol) {
 };
 
 Singer.prototype.getVolume = function () {
-  return this.decoder ? binding.mpg123_getvolume(this.decoder.mh) : -1;
+  return this.decoder ? binding.mpg123_getvolume(this.decoder.mh) * 100 : -1;
 };
