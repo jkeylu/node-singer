@@ -62,6 +62,7 @@ Singer.prototype.sing = function (s) {
     self.stream.pipe(self.decoder).on('format', function (format) {
       self.speaker = new Speaker(format);
       self.decoder.pipe(self.speaker);
+      this.emit('singing');
     });
   });
 };
@@ -70,6 +71,7 @@ Singer.prototype.pause = function () {
   if (this.stream && this.state == 'singing') {
     this.state = 'paused';
     this.stream.unpipe();
+    this.emit('paused');
   }
 };
 
@@ -77,11 +79,14 @@ Singer.prototype.resume = function () {
   if (this.stream && this.state == 'paused') {
     this.state = 'singing';
     this.stream.pipe(this.decoder);
+    this.emit('singing');
   }
 };
 
 Singer.prototype.stop = function () {
   if (this.stream) {
+    this.state = 'stoped';
+
     this.stream.unpipe();
     this.stream.destroy();
     this.stream = null;
@@ -89,13 +94,16 @@ Singer.prototype.stop = function () {
     this.decoder.unpipe();
     this.speaker.end();
     this.speaker = null;
+
+    this.emit('stoped');
   }
 };
 
 Singer.prototype.turnTo = function (vol) {
-  if (this.decoder) {
+  if (this.decoder && vol > 0) {
     vol = vol / 100;
     binding.mpg123_volume(this.decoder.mh, vol);
+    this.emit('volumeChanged');
   }
 };
 
