@@ -9,17 +9,31 @@ var EventEmitter = require('events').EventEmitter
 
 module.exports = Singer;
 
-function Singer() {
+function SingerState(options) {
   this.decoder = null;
   this.stream = null;
   this.speaker = null;
   this.state = 'stoped';
+
+  var vol = options.defaultVolume;
+  this.volume = (vol || vol === 0) ? vol : 10;
+  this.volume = ~~this.volume;
+}
+
+function Singer(options) {
+  options = options || {};
+  var ss = this._singerState = new SingerState(options);
+  Object.defineProperty(this, 'state', {
+    configurable: false,
+    get: function () { return ss.state; }
+  });
 }
 
 inherits(Singer, EventEmitter);
 
 Singer.prototype._setStream = function (s, done) {
-  var type = typeof s
+  var ss = this._singerState
+    , type = typeof s
     , err = null;
 
   if (type == 'string') {
@@ -35,7 +49,7 @@ Singer.prototype._setStream = function (s, done) {
   type = typeof s;
 
   if (type == 'object' && s.readable === true) {
-    this.stream = s;
+    ss.stream = s;
   } else {
     err = 'It is not a readable stream.';
   }
@@ -46,9 +60,10 @@ Singer.prototype._setStream = function (s, done) {
 Singer.prototype.sing = function (s) {
   debug('Sing song path: "%s"', s);
 
-  var self = this;
+  var self = this
+    , ss = this._singerState;
 
-  if (this.state != 'stoped') {
+  if (ss.state != 'stoped') {
     this.stop();
   }
   this._setStream(s, function(err) {
@@ -57,56 +72,88 @@ Singer.prototype.sing = function (s) {
       return;
     }
 
-    self.state = 'singing';
-    self.decoder = new lame.Decoder();
-    self.stream.pipe(self.decoder).on('format', function (format) {
-      self.speaker = new Speaker(format);
-      self.decoder.pipe(self.speaker);
-      this.emit('singing');
+    ss.state = 'singing';
+    ss.decoder = new lame.Decoder();
+    ss.stream.pipe(ss.decoder).on('format', function (format) {
+      ss.speaker = new Speaker(format);
+      ss.decoder.pipe(ss.speaker);
+      self.emit('singing');
     });
   });
 };
 
 Singer.prototype.pause = function () {
-  if (this.stream && this.state == 'singing') {
-    this.state = 'paused';
-    this.stream.unpipe();
+  var ss = this._singerState;
+  if (ss.stream && ss.state == 'singing') {
+    ss.state = 'paused';
+    ss.stream.unpipe();
     this.emit('paused');
   }
 };
 
 Singer.prototype.resume = function () {
-  if (this.stream && this.state == 'paused') {
-    this.state = 'singing';
-    this.stream.pipe(this.decoder);
+  var ss = this._singerState;
+  if (ss.stream && ss.state == 'paused') {
+    ss.state = 'singing';
+    ss.stream.pipe(ss.decoder);
     this.emit('singing');
   }
 };
 
 Singer.prototype.stop = function () {
-  if (this.stream) {
-    this.state = 'stoped';
+  var ss = this._singerState;
+  if (ss.stream) {
+    ss.state = 'stoped';
 
-    this.stream.unpipe();
-    this.stream.destroy();
-    this.stream = null;
+    ss.stream.unpipe();
+    ss.stream.destroy();
+    ss.stream = null;
 
-    this.decoder.unpipe();
-    this.speaker.end();
-    this.speaker = null;
+    ss.decoder.unpipe();
+    ss.speaker.end();
+    ss.speaker = null;
 
     this.emit('stoped');
   }
 };
 
 Singer.prototype.turnTo = function (vol) {
-  if (this.decoder && vol > 0) {
-    vol = vol / 100;
-    binding.mpg123_volume(this.decoder.mh, vol);
+  var ss = this._singerState;
+  if (ss.decoder && vol > 0) {
+    ss.volume = vol;
+    binding.mpg123_volume(ss.decoder.mh, ss.volume / 100);
     this.emit('volumeChanged');
   }
 };
 
-Singer.prototype.getVolume = function () {
-  return this.decoder ? binding.mpg123_getvolume(this.decoder.mh) * 100 : -1;
+Singer.prototype.turnUp = function (increment, callback) {
+  var ss = this._singerState;
+  if (ss.decoder && increment > 0) {
+    ss.volume += increment;
+    binding.mpg123_volume(ss.decoder.mh, ss.volume / 100);
+    this.emit('volumeChanged');
+    callback(ss.volume);
+  }
+};
+
+Singer.prototype.turnDown = function (step, callback) {
+  var ss = this._singerState;
+  if (ss.decoder && increment > 0) {
+    if (ss.volume > increment)
+      ss.volume -= increment;
+    else
+      ss.volume = 0;
+    binding.mpg123_volume(ss.decoder.mh, ss.volume / 100);
+    this.emit('volumeChanged');
+    callback(ss.volume);
+  }
+};
+
+Singer.prototype.getVolume = function (real) {
+  var ss = this._singerState
+    , vol = -1;
+  if (ss.decoder) {
+    vol = real === true ? binding.mpg123_getvolume(ss.decoder.mh) * 100 : ss.volume;
+  }
+  return vol;
 };
