@@ -16,8 +16,10 @@ function SingerState(options) {
   this.state = 'stoped';
 
   var vol = options.defaultVolume;
-  this.volume = (vol || vol === 0) ? vol : 10;
+  this.volume = (vol || vol === 0) ? vol : 100;
   this.volume = ~~this.volume;
+
+  this.tween = null;
 }
 
 function Singer(options) {
@@ -78,6 +80,9 @@ Singer.prototype.sing = function (s) {
       ss.speaker = new Speaker(format);
       ss.decoder.pipe(ss.speaker);
       self.emit('singing');
+      process.nextTick(function () {
+        binding.mpg123_volume(ss.decoder.mh, ss.volume / 100);
+      });
     });
   });
 };
@@ -87,6 +92,7 @@ Singer.prototype.pause = function () {
   if (ss.stream && ss.state == 'singing') {
     ss.state = 'paused';
     ss.stream.unpipe();
+    slideTurnDownVolume(this, ss);
     this.emit('paused');
   }
 };
@@ -94,15 +100,32 @@ Singer.prototype.pause = function () {
 Singer.prototype.resume = function () {
   var ss = this._singerState;
   if (ss.stream && ss.state == 'paused') {
+    ss.tween && clearTimeout(ss.tween);
     ss.state = 'singing';
     ss.stream.pipe(ss.decoder);
+    process.nextTick(function () {
+      binding.mpg123_volume(ss.decoder.mh, ss.volume / 100);
+    });
     this.emit('singing');
   }
 };
 
+function slideTurnDownVolume(singer, ss) {
+  var vol = ss.volume;
+  binding.mpg123_volume(ss.decoder.mh, vol / 2 / 100);
+  ss.tween = setTimeout(function () {
+    binding.mpg123_volume(ss.decoder.mh, vol / 2 / 100);
+    ss.tween = setTimeout(function () {
+      ss.tween = null;
+      binding.mpg123_volume(ss.decoder.mh, vol / 3 / 100);
+    }, 500);
+  }, 800);
+}
+
 Singer.prototype.stop = function () {
   var ss = this._singerState;
   if (ss.stream) {
+    ss.tween && clearTimeout(ss.tween);
     ss.state = 'stoped';
 
     ss.stream.unpipe();
