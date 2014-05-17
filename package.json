@@ -1,6 +1,6 @@
 {
   "name": "singer",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "node-singer ===========",
   "main": "index.js",
   "scripts": {
@@ -16,13 +16,20 @@
     "url": "https://github.com/jkeylu/node-singer/issues"
   },
   "dependencies": {
-    "speaker": "https://github.com/jkeylu/node-speaker/archive/v0.0.10-p1.tar.gz",
-    "lame": "~1.0.3",
     "bindings": "*",
+    "debug": "*",
+    "lame": "~1.0.3",
+    "node-pre-gyp": "^0.5.13",
     "request": "*",
-    "debug": "*"
+    "speaker-prebuild": "^0.1.0"
   },
+  "bundledDependencies": [ "node-pre-gyp" ],
   "devDependencies": {
     "keypress": "~0.2.1"
+  },
+  "binary": {
+    "module_name": "binding",
+    "module_path": "./build/Release/",
+    "host": "https://jkeylu.github.io/node-singer"
   }
 }

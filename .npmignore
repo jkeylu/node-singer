@@ -1,0 +1,5 @@
+*.mp3
+example.js
+package_binary
+package_binary.cmd
+build/

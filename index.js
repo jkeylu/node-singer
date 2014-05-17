@@ -4,7 +4,7 @@ var EventEmitter = require('events').EventEmitter
   , debug = require('debug')('singer')
   , fs = require('fs')
   , request = require('request')
-  , Speaker = require('speaker')
+  , Speaker = require('speaker-prebuild')
   , lame = require('lame');
 
 module.exports = Singer;

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+rm -rf ./build/Release/obj.target
+rm -rf ./build/Release/.deps
+rm ./build/Release/libmpg123.a
+rm ./build/Release/linker.lock
+node-pre-gyp package
