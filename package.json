@@ -1,9 +1,10 @@
 {
   "name": "singer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "node-singer ===========",
   "main": "index.js",
   "scripts": {
+    "install": "node-pre-gyp install --fallback-to-build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,12 +19,14 @@
   "dependencies": {
     "bindings": "*",
     "debug": "*",
-    "lame": "~1.0.3",
+    "lame-prebuild": "^1.1.0",
     "node-pre-gyp": "^0.5.13",
     "request": "*",
     "speaker-prebuild": "^0.1.0"
   },
-  "bundledDependencies": [ "node-pre-gyp" ],
+  "bundledDependencies": [
+    "node-pre-gyp"
+  ],
   "devDependencies": {
     "keypress": "~0.2.1"
   },
