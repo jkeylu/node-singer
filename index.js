@@ -78,6 +78,7 @@ Singer.prototype.sing = function (s) {
     ss.decoder = new lame.Decoder();
     ss.stream.pipe(ss.decoder).on('format', function (format) {
       ss.speaker = new Speaker(format);
+      ss.speaker.on('close', function () { self.emit('end'); });
       ss.decoder.pipe(ss.speaker);
       self.emit('singing');
       process.nextTick(function () {

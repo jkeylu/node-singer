@@ -7,6 +7,7 @@
     "install": "node-pre-gyp install --fallback-to-build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": "./bin/singer",
   "repository": {
     "type": "git",
     "url": "git://github.com/jkeylu/node-singer.git"
@@ -20,9 +21,9 @@
     "bindings": "*",
     "debug": "*",
     "lame-prebuild": "^1.1.0",
-    "node-pre-gyp": "^0.5.13",
+    "node-pre-gyp": "^0.5.16",
     "request": "*",
-    "speaker-prebuild": "^0.1.0"
+    "speaker-prebuild": "^0.1.3"
   },
   "bundledDependencies": [
     "node-pre-gyp"
