@@ -75,6 +75,6 @@ function singSongs(songs) {
 
   singer.sing(songs[i % songs.length]);
   singer.on('end', function () {
-    singer.sing(songs[i % songs.length]);
+    singer.sing(songs[(++i) % songs.length]);
   });
 }
