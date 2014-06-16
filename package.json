@@ -1,7 +1,7 @@
 {
   "name": "singer",
-  "version": "0.0.3",
-  "description": "node-singer ===========",
+  "version": "0.0.4",
+  "description": "mp3 player",
   "main": "index.js",
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build",
