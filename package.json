@@ -20,6 +20,7 @@
   "dependencies": {
     "bindings": "*",
     "debug": "*",
+    "keypress": "~0.2.1",
     "lame-prebuild": "^1.1.0",
     "node-pre-gyp": "^0.5.16",
     "request": "*",
@@ -28,9 +29,6 @@
   "bundledDependencies": [
     "node-pre-gyp"
   ],
-  "devDependencies": {
-    "keypress": "~0.2.1"
-  },
   "binary": {
     "module_name": "binding",
     "module_path": "./build/Release/",
